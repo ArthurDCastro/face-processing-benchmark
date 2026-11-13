@@ -1,0 +1,4 @@
+# Scaffold example. Populate after dataset selection and license review.
+schema_version: 1
+kind: datasets
+datasets: {}

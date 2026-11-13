@@ -1,0 +1,4 @@
+# Scaffold example. Populate after method selection; no candidates are enabled.
+schema_version: 1
+kind: methods
+methods: {}
