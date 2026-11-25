@@ -1,4 +1,130 @@
-# Scaffold example. Populate after method selection; no candidates are enabled.
-schema_version: 1
+# Implementation candidates identify upstream APIs or projects. Local adapters are pending.
+# Checkpoint paths, when applicable, are repository-relative.
+schema_version: 2
 kind: methods
-methods: {}
+methods:
+  viola_jones:
+    name: Viola-Jones
+    task: face_detection
+    type: classical
+    implementation: {candidate: cv2.CascadeClassifier, status: planned}
+    checkpoint:
+      path: null # TODO: Select a local Haar cascade XML.
+      version: null # TODO: Pin the cascade release and library version.
+      sha256: null # TODO: Record the cascade file hash.
+    parameters:
+      scale_factor: null # TODO: Fix the scan scale factor.
+      min_neighbors: null # TODO: Fix the neighbor count.
+      min_size_px: null # TODO: Fix the minimum face size.
+    output: face_boxes
+  hog_svm:
+    name: HOG + SVM
+    task: face_detection
+    type: classical
+    implementation: {candidate: dlib.get_frontal_face_detector, status: planned}
+    checkpoint:
+      source: bundled_if_dlib_is_selected
+      version: null # TODO: Pin the trained detector and the library version.
+      sha256: null # TODO: Record the weights hash or the pinned distribution hash for bundled weights.
+    parameters:
+      upsample_count: null # TODO: Fix the image pyramid upsampling count.
+    output: face_boxes
+  yunet:
+    name: YuNet
+    task: face_detection
+    type: deep_learning
+    implementation: {candidate: cv2.FaceDetectorYN, status: planned}
+    checkpoint:
+      path: null # TODO: Select a local YuNet ONNX file.
+      version: null # TODO: Pin the model revision.
+      sha256: null # TODO: Record the ONNX file hash.
+    parameters:
+      score_threshold: null # TODO: Set the confidence threshold in validation.
+      nms_threshold: null # TODO: Fix the NMS threshold.
+      internal_resolution_px: null # TODO: Fix the input sizing policy.
+    output: face_boxes
+  scrfd:
+    name: SCRFD
+    task: face_detection
+    type: deep_learning
+    implementation: {candidate: InsightFace SCRFD, status: planned}
+    checkpoint:
+      variant: null # TODO: Select the SCRFD variant.
+      path: null # TODO: Confirm the local checkpoint path.
+      version: null # TODO: Pin the checkpoint revision.
+      sha256: null # TODO: Record the checkpoint hash.
+    parameters:
+      score_threshold: null # TODO: Set the confidence threshold in validation.
+      nms_threshold: null # TODO: Fix the NMS threshold.
+      internal_resolution_px: null # TODO: Fix the input sizing policy.
+      batch_size: null # TODO: Fix the inference batch size.
+    output: face_boxes
+  grabcut:
+    name: GrabCut
+    task: background_removal
+    type: classical
+    implementation: {candidate: cv2.grabCut, status: planned}
+    parameters:
+      iterations: null # TODO: Fix the iteration count in technical validation.
+      resolution_policy: null # TODO: Confirm internal sizing and mask restoration.
+      initialization:
+        automatic: true
+        deterministic: true
+        reference_mask_access: false
+        rule: null # TODO: Define the image-derived cues and initialization parameters.
+        record_for_audit: true
+    output:
+      semantics: binary_mask
+      conversion: foreground_labels_to_binary_0_1
+      alpha_evaluation: label_as_binary_0_1_approximation
+  closed_form_matting:
+    name: Closed-Form Matting
+    task: background_removal
+    type: classical
+    implementation:
+      status: planned
+      candidate: null # TODO: Select and pin the implementation.
+    parameters:
+      solver: null # TODO: Fix the solver and its parameters.
+      resolution_policy: null # TODO: Confirm internal sizing and alpha restoration.
+      trimap:
+        automatic: true
+        deterministic: true
+        reference_mask_access: false
+        use_grabcut_final_output: false
+        rule: null # TODO: Define the image-derived trimap and unknown band width.
+    output: {semantics: alpha, conversion: preserve_continuous_alpha}
+  modnet:
+    name: MODNet
+    task: background_removal
+    type: deep_learning
+    implementation: {candidate: ZHKKKe/MODNet, status: planned}
+    checkpoint:
+      variant: null # TODO: Select the pretrained MODNet variant.
+      path: null # TODO: Confirm the local checkpoint path.
+      version: null # TODO: Pin the checkpoint revision.
+      sha256: null # TODO: Record the checkpoint hash.
+    parameters:
+      batch_size: null # TODO: Fix the inference batch size.
+      internal_resolution_px: null # TODO: Confirm model input size and resize rules.
+      mask_restoration: null # TODO: Fix resampling back to the condition image.
+    output: {semantics: alpha, conversion: preserve_continuous_alpha}
+  birefnet_portrait:
+    name: BiRefNet Portrait
+    task: background_removal
+    type: deep_learning
+    implementation: {candidate: ZhengPeng7/BiRefNet-portrait, status: planned}
+    checkpoint:
+      family: portrait
+      variant: null # TODO: Select the exact Portrait model variant.
+      path: null # TODO: Confirm the local checkpoint path.
+      version: null # TODO: Pin the checkpoint revision.
+      sha256: null # TODO: Record the checkpoint hash.
+    parameters:
+      batch_size: null # TODO: Fix the inference batch size.
+      internal_resolution_px: null # TODO: Confirm model input size and resize rules.
+      mask_restoration: null # TODO: Fix resampling back to the condition image.
+    output:
+      semantics: null # TODO: Verify the output semantics of the selected checkpoint.
+      conversion: null # TODO: Confirm the conversion to a continuous map in [0, 1].
+      alpha_evaluation: require_verified_alpha_semantics

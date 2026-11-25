@@ -2,76 +2,81 @@
 
 Projeto científico desenvolvido como trabalho final da disciplina de Visão
 Computacional do Departamento de Informática da Universidade Federal do Paraná
-(UFPR).
+(UFPR). O projeto compara métodos clássicos e de aprendizado profundo para
+centralização facial e remoção de fundo, com execução prevista pelo terminal.
 
-O objetivo é comparar detecção facial, centralização e recorte de imagens,
-segmentação de pessoas e o efeito do pré-processamento na segmentação. O projeto
-é independente de aplicações externas e terá execução pelo terminal, sem depender
-de interface gráfica.
+## Experimentos
 
-## Escopo atual
+| Experimento | Avaliação | Dados |
+| --- | --- | --- |
+| E1 | Centralização sintética com quatro detectores e referência facial aproximada | 1.000 imagens da LFW funneled |
+| E2 | Remoção de fundo com quatro métodos nas imagens originais | PPM-100 para validação técnica e P3M-500-NP para avaliação final |
+| E3 | Comparação pareada entre imagem original (C0), centralização com preenchimento (C1) e centralização por recorte (C2) | PPM-100 para validação técnica e P3M-500-NP para avaliação final |
 
-Esta é a estrutura inicial descrita nas seções 9 e 10 da
-[especificação do repositório](ESTRUTURA_REPOSITORIO.md). Ainda não há métodos,
-carregadores de dados, métricas, experimentos, downloads de modelos ou resultados
-científicos implementados. Os cadastros de datasets e métodos estão
-intencionalmente vazios.
+Em E3, um único detector escolhido a partir de E1 prepara C1 e C2. A comparação
+principal avalia a região original comum às três condições. A geometria das
+imagens também é aplicada às referências de segmentação para o cálculo das
+métricas. Os parâmetros serão congelados antes da avaliação final.
+[Protocolo experimental](docs/PROTOCOLO_EXPERIMENTAL.md) ·
+[Métricas](docs/METRICAS_AVALIACAO.md)
 
-A documentação está em português brasileiro. Nomes de arquivos e pastas,
-código, comentários, docstrings, mensagens de log e configurações permanecem em
-inglês. Os documentos de planejamento existentes conservam seus nomes originais.
+## Estado atual
 
-## Instalação e validação
+Os oito métodos estão selecionados e os seis YAMLs já registram os datasets, os
+métodos e o protocolo de E1, E2 e E3. Os campos `null` acompanhados de `TODO`
+registram decisões em aberto. O carregador `fpb-check-config` ainda suporta apenas
+cadastros vazios da versão 1. A leitura dos YAMLs experimentais da versão 2,
+os adaptadores dos métodos, as métricas e os executores estão pendentes.
+[Métodos selecionados](docs/METODOS_SELECIONADOS.md) ·
+[Especificação dos YAMLs](docs/CONFIGURACAO_EXPERIMENTOS.md)
 
-É necessário Python 3.11 ou superior. Na raiz do repositório:
+A cópia local contém manifestos e relatórios de integridade para a LFW
+(13.233 imagens), o PPM-100 (100 pares) e o P3M-500-NP (500 pares). LFW e PPM-100
+têm listas técnicas de 20 amostras cada. A seleção das 1.000 imagens do E1
+é uma etapa distinta. [Datasets selecionados](docs/DATASETS_SELECIONADOS.md)
+
+## Instalação e preparação de dados
+
+Use Python 3.11 ou superior. Na raiz do repositório:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
-python -c "import face_processing_benchmark"
-fpb-check-config configs/datasets.yaml
-python scripts/check_config.py configs/methods.yaml
-python -m pytest
-python -m ruff check .
+python -m pip install pillow numpy
 ```
 
-A validação de configurações verifica apenas o esquema da estrutura inicial;
-não valida imagens, arquivos de modelos ou protocolos experimentais. O comando
-também pode ser executado como
-`python -m face_processing_benchmark.core.config CONFIG`. Ele apenas lê o arquivo
-informado e não gera resultados. Bibliotecas de modelos serão adicionadas como
-dependências opcionais após a seleção dos métodos.
+Com os dados originais já disponíveis em `datasets/<dataset>/raw/`:
 
-## Organização e próximas etapas
+```bash
+python scripts/prepare_datasets.py --index
+python scripts/validate_datasets.py --dataset all
+python scripts/create_test_samples.py
+```
 
-- `configs/`: exemplos de cadastros e espaço para futuras configurações experimentais.
-- `src/face_processing_benchmark/core/`: infraestrutura compartilhada e futuros contratos.
-- `scripts/`: pontos de entrada enxutos que chamam o código reutilizável do pacote.
-- `tests/`: testes pequenos de infraestrutura, sem datasets ou modelos.
-- `datasets/`, `models/`, `results/`: orientações de armazenamento e procedência.
+Os manifestos, relatórios de integridade e listas técnicas ficam em
+`datasets/<dataset>/processed/`. O último comando valida e reutiliza as listas
+existentes. Passe `--recreate` para refazê-las com a semente 42. Para obter os
+dados e conhecer as opções dos scripts, consulte o
+[guia de download e preparação](docs/DOWNLOAD_DATASETS.md).
 
-Seguir [ETAPAS.md](ETAPAS.md) e a seção 10 da especificação de forma incremental:
-selecionar os métodos antes de adicionar implementações individuais em `methods/`;
-criar `data/` durante a preparação dos dados; adicionar `evaluation/`,
-`experiments/` e seus comandos independentes durante a implementação dos
-benchmarks. Criar `analysis/`, `report/` e `presentation/` quando houver necessidade
-de analisar resultados e produzir os materiais de comunicação do trabalho.
+Os testes atuais cobrem a infraestrutura inicial. Parte deles usa os cadastros
+preenchidos como exemplos do esquema antigo e precisa ser ajustada junto com a
+atualização do carregador.
 
-Os futuros contratos devem explicitar imagens RGB, unidades de coordenadas,
-semântica das máscaras, transformações geométricas, regiões válidas, preservação
-das entradas e estados de falha interpretáveis. O pré-processamento deve
-transformar as máscaras de referência com a mesma geometria das imagens e
-registrar as áreas removidas. Consultar a seção 5 da especificação antes de
-implementar esses contratos.
+## Organização
 
-Os caminhos devem ser relativos ao repositório ou configuráveis. Dados e
-anotações originais permanecem imutáveis; dados derivados e saídas de cada execução
-têm locais separados. Nenhuma aplicação externa é necessária e nenhum dado ou
-peso de modelo é baixado automaticamente.
+- `configs/` contém os cadastros e os YAMLs experimentais.
+- `docs/` reúne o protocolo, as métricas e a documentação de métodos e dados.
+- `scripts/` contém os utilitários de preparação, validação e amostragem de dados, além do verificador de configuração inicial.
+- `src/face_processing_benchmark/core/` e `tests/` contêm o carregador inicial e seus testes.
+- `datasets/`, `models/` e `results/` são os locais previstos para dados, pesos e saídas experimentais, respectivamente.
+
+A documentação do projeto usa português brasileiro. Código, configurações,
+comentários e mensagens dos scripts usam inglês.
+[Estrutura atual e planejada](ESTRUTURA_REPOSITORIO.md) · [Etapas do projeto](ETAPAS.md)
 
 ## Licenciamento
 
-A licença do código ainda não foi escolhida; nenhuma concessão de licença está
-implícita. As licenças de datasets e checkpoints devem ser registradas
-separadamente antes do uso ou da redistribuição.
+A licença do código ainda está pendente. Registre separadamente os termos de uso
+dos datasets e checkpoints antes de redistribuir imagens, anotações ou pesos.

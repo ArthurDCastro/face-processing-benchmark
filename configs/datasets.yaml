@@ -1,4 +1,36 @@
-# Scaffold example. Populate after dataset selection and license review.
-schema_version: 1
+# Manifest locations are repository-relative. Image and matte cells use datasets_root.
+schema_version: 2
 kind: datasets
-datasets: {}
+manifest_format:
+  columns: [id, image, matte]
+  entry_paths_relative_to: datasets_root
+  # An empty matte cell is allowed only when the dataset does not require mattes.
+datasets:
+  lfw:
+    name: Labeled Faces in the Wild
+    variant: funneled
+    purpose: synthetic_face_centering
+    images_dir: datasets/lfw/raw/lfw_funneled
+    manifest: datasets/lfw/processed/manifest.csv
+    expected_manifest_rows: {minimum: 1000}
+    initial_sample_count: 1000
+    matte_required: false
+    face_reference: approximate
+  ppm100:
+    name: PPM-100
+    purpose: technical_validation
+    images_dir: datasets/ppm100/raw/image
+    mattes_dir: datasets/ppm100/raw/matte
+    manifest: datasets/ppm100/processed/manifest.csv
+    expected_manifest_rows: {exact: 100}
+    matte_required: true
+    matte_type: alpha
+  p3m500np:
+    name: P3M-500-NP
+    purpose: final_evaluation
+    images_dir: datasets/p3m500np/raw/validation/P3M-500-NP/original_image
+    mattes_dir: datasets/p3m500np/raw/validation/P3M-500-NP/mask
+    manifest: datasets/p3m500np/processed/manifest.csv
+    expected_manifest_rows: {exact: 500}
+    matte_required: true
+    matte_type: alpha

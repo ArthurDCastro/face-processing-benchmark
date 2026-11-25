@@ -8,35 +8,43 @@ Desenvolver uma avaliação experimental independente de métodos clássicos e m
 
 ## Etapa 1 — Seleção de métodos e modelos
 
-- [ ] 1.1. Listar os métodos clássicos de detecção facial candidatos.
-- [ ] 1.2. Listar os modelos de aprendizado profundo para detecção facial candidatos.
-- [ ] 1.3. Selecionar os métodos de centralização e recorte a comparar.
-- [ ] 1.4. Listar os métodos clássicos de segmentação de pessoas candidatos.
-- [ ] 1.5. Listar os modelos de aprendizado profundo para segmentação de pessoas candidatos.
-- [ ] 1.6. Localizar os artigos científicos e repositórios de cada candidato.
+- [x] 1.1. Listar os métodos clássicos de detecção facial candidatos.
+- [x] 1.2. Listar os modelos de aprendizado profundo para detecção facial candidatos.
+- [x] 1.3. Selecionar os métodos de centralização e recorte a comparar.
+- [x] 1.4. Listar os métodos clássicos de segmentação de pessoas candidatos.
+- [x] 1.5. Listar os modelos de aprendizado profundo para segmentação de pessoas candidatos.
+- [x] 1.6. Localizar os artigos científicos e repositórios de cada candidato.
 - [ ] 1.7. Verificar disponibilidade de código, pesos, dependências e licenças.
-- [ ] 1.8. Montar uma tabela com candidatos, características e referências.
-- [ ] 1.9. Definir e justificar a lista final de métodos e modelos.
+- [x] 1.8. Montar uma tabela com candidatos, características e referências.
+- [x] 1.9. Definir e justificar os oito métodos principais. A escolha das variantes e dos pesos segue no item 1.7.
 
-**Entrega:** tabela de métodos selecionados, referências e justificativas.
+**Entrega:** [métodos selecionados, referências e justificativas](docs/METODOS_SELECIONADOS.md).
 
 ## Etapa 2 — Preparação dos dados e do protocolo experimental
 
-- [ ] 2.1. Pesquisar datasets públicos para avaliação de detecção facial.
-- [ ] 2.2. Pesquisar datasets públicos de retratos com máscaras de segmentação.
-- [ ] 2.3. Selecionar os datasets e verificar suas condições de uso.
-- [ ] 2.4. Baixar e organizar as imagens e anotações.
-- [ ] 2.5. Criar um script para validar imagens, máscaras e identificadores.
-- [ ] 2.6. Definir as métricas de avaliação de cada tarefa.
-- [ ] 2.7. Definir as configurações dos experimentos e os cenários de teste.
-- [ ] 2.8. Criar os arquivos de configuração e a estrutura de diretórios.
-- [ ] 2.9. Preparar um conjunto pequeno de imagens para validar os scripts.
+- [x] 2.1. Pesquisar datasets públicos para avaliação de detecção facial.
+- [x] 2.2. Pesquisar datasets públicos de retratos com máscaras de segmentação.
+- [x] 2.3. Selecionar LFW funneled, PPM-100 e P3M-500-NP.
+- [ ] 2.3.1. Confirmar os termos de uso e as permissões de redistribuição.
+- [x] 2.4. Organizar as imagens e anotações locais e gerar os três manifestos.
+- [x] 2.5. Criar o validador. Os relatórios locais registram 13.233 imagens LFW, 100 pares PPM-100 e 500 pares P3M-500-NP válidos.
+- [x] 2.6. Documentar as métricas de avaliação de cada tarefa.
+- [x] 2.7. Documentar os cenários e o protocolo inicial de E1, E2 e E3.
+- [x] 2.8. Criar os seis YAMLs experimentais e registrar decisões em aberto com `null` e `TODO`.
+- [x] 2.9. Gerar listas técnicas de 20 imagens LFW e 20 pares PPM-100 com semente 42.
+- [ ] 2.10. Fixar a seleção de 1.000 imagens LFW do E1 e registrar os IDs amostrados.
+- [ ] 2.11. Resolver os parâmetros em aberto do protocolo e congelar a configuração antes da avaliação final. O detector do E3 será escolhido após E1.
+- [x] 2.12. Adequar o `.gitignore` ao layout por dataset.
+- [ ] 2.13. Confirmar quais metadados podem ser versionados.
 
-**Entrega:** datasets organizados, métricas e protocolo experimental definidos.
+**Entrega:** datasets organizados, métricas documentadas e protocolo inicial configurado.
+[Preparação dos dados](docs/DOWNLOAD_DATASETS.md) · [Métricas](docs/METRICAS_AVALIACAO.md) ·
+[Protocolo experimental](docs/PROTOCOLO_EXPERIMENTAL.md) ·
+[Configurações](docs/CONFIGURACAO_EXPERIMENTOS.md)
 
 ## Etapa 3 — Implementação dos métodos
 
-- [ ] 3.1. Criar o repositório e configurar o ambiente Python.
+- [x] 3.1. Criar o repositório e configurar o ambiente Python.
 - [ ] 3.2. Implementar ou integrar os detectores faciais clássicos.
 - [ ] 3.3. Implementar ou integrar os detectores faciais baseados em aprendizado profundo.
 - [ ] 3.4. Implementar os métodos de centralização e recorte.
@@ -49,18 +57,19 @@ Desenvolver uma avaliação experimental independente de métodos clássicos e m
 - [ ] 3.11. Criar scripts independentes para executar cada método e experimento.
 - [ ] 3.12. Testar cada implementação com o conjunto pequeno de validação.
 - [ ] 3.13. Criar um script para executar os experimentos em lote.
+- [ ] 3.14. Atualizar o carregador para o esquema experimental v2 e adaptar os testes atuais do esquema v1.
 
 **Entrega:** métodos funcionais, testes básicos e scripts independentes e reproduzíveis.
 
 ## Etapa 4 — Execução e geração dos resultados
 
-- [ ] 4.1. Executar os experimentos de detecção facial.
-- [ ] 4.2. Executar os experimentos de centralização e recorte.
-- [ ] 4.3. Executar os experimentos de segmentação com métodos clássicos.
-- [ ] 4.4. Executar os experimentos de segmentação com modelos de aprendizado profundo.
-- [ ] 4.5. Executar os experimentos de influência da centralização e do recorte na segmentação, incluindo imagens originais como referência de comparação.
-- [ ] 4.6. Executar os experimentos de desempenho computacional.
-- [ ] 4.7. Executar os experimentos com combinações selecionadas de métodos.
+- [ ] 4.1. Executar o E1 na LFW e registrar os diagnósticos de detecção.
+- [ ] 4.2. Consolidar as métricas pós-centralização do E1 e escolher o detector fixo do E3.
+- [ ] 4.3. Validar tecnicamente E2 e E3 com PPM-100 e congelar os parâmetros da avaliação final.
+- [ ] 4.4. Executar E2 com os quatro métodos nas imagens originais do P3M-500-NP.
+- [ ] 4.5. Executar E3 nas mesmas imagens do P3M-500-NP, com comparação pareada de C0, C1 e C2.
+- [ ] 4.6. Coletar as medições de desempenho previstas em E1, E2 e E3.
+- [ ] 4.7. Verificar a elegibilidade para reutilizar C0 de E2 em E3.
 - [ ] 4.8. Consolidar e validar os resultados obtidos, registrando falhas e configurações.
 - [ ] 4.9. Gerar as estatísticas, tabelas e gráficos comparativos.
 - [ ] 4.10. Selecionar e organizar exemplos visuais dos resultados.
@@ -69,7 +78,7 @@ Desenvolver uma avaliação experimental independente de métodos clássicos e m
 
 ## Etapa 5 — Análise e discussão dos resultados
 
-- [ ] 5.1. Comparar a precisão e o desempenho dos detectores faciais.
+- [ ] 5.1. Comparar a precisão da centralização e o custo computacional dos detectores em E1.
 - [ ] 5.2. Avaliar as diferenças entre os métodos de centralização e recorte.
 - [ ] 5.3. Comparar os métodos clássicos e de aprendizado profundo na segmentação.
 - [ ] 5.4. Analisar a influência da centralização e do recorte sobre a segmentação.

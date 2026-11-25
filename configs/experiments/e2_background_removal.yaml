@@ -1,0 +1,31 @@
+schema_version: 2
+kind: experiment
+experiment_id: e2_background_removal
+config_files:
+  common: configs/common.yaml
+  datasets: configs/datasets.yaml
+  methods: configs/methods.yaml
+modes:
+  technical_validation: {dataset_id: ppm100, allow_parameter_adjustment: true}
+  final_evaluation: {dataset_id: p3m500np, allow_parameter_adjustment: false}
+method_ids: [grabcut, closed_form_matting, modnet, birefnet_portrait]
+input_geometry: original
+scenarios:
+  E2-S1:
+    purpose: quality
+    inferences_per_image_and_method: 1
+  E2-S2:
+    purpose: performance
+    settings_from: common.performance
+evaluation:
+  metrics_from: common.policies.segmentation.metrics
+  primary_region: original_image
+  stratification_rules: null # TODO: Define reproducible strata if T2.3 is included.
+outputs:
+  per_sample:
+    file: per_image.csv
+    row_key: [image_id, method]
+    columns: [image_id, method, dataset, image_width, image_height, internal_width, internal_height, resize, output_resampling, iou, dice, boundary_f1, sad, mse, mae, output_semantics, preprocess_ms, auxiliary_ms, inference_ms, postprocess_ms, total_ms, peak_ram_mb, peak_vram_mb, status, error_reason, checkpoint_id, config_hash]
+  summary: summary.csv
+  tables: [T2.1, T2.2, T2.3, T2.4]
+  figures: [G2.1, G2.2, G2.3, G2.4, G2.5, G2.6]

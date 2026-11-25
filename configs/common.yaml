@@ -1,0 +1,76 @@
+# Version 2 describes the experimental protocol. The v1 loader only accepts empty registries.
+# Before execution, a future loader must resolve IDs and report required null fields
+# by file and key for the selected experiment, mode and stage.
+schema_version: 2
+kind: common
+seed: 42
+paths:
+  relative_to: repository_root
+  datasets_root: datasets
+  checkpoints_root: models/checkpoints
+  allow_implicit_downloads: false
+execution:
+  device: cpu
+  supported_devices: [cpu, gpu]
+  threads: null # TODO: Fix the thread count for the benchmark environment.
+  environment: null # TODO: Freeze hardware and software versions before final evaluation.
+  record_environment: [os, cpu, gpu, ram, device, threads, python, opencv, pytorch, model_versions, git_revision]
+  deep_learning_inference: {evaluation_mode: true, gradients: false}
+policies:
+  same_inputs_for_competitors: true
+  record_selected_image_ids_and_random_parameters: true
+  raw_data_read_only: true
+  reference_masks_usage: evaluation_only
+  freeze_parameters_before_final_evaluation: true
+  tune_on_final_dataset: false
+  record_input_processing: [color_conversion, exif_orientation, normalization, resize]
+  face_detection:
+    box_format: xywh_pixels
+    box_space: detector_input_before_model_resize
+    multiple_faces: select_largest
+    record_multiple_faces: true
+  segmentation:
+    prefer_original_resolution_if_supported: true
+    restore_output_to_condition_image_coordinates: true
+    preserve_continuous_values: true
+    mask_value_range: [0, 1]
+    binary_threshold: 0.5
+    apply_binary_threshold_to: [prediction, reference]
+    metrics:
+      binary: [iou, dice, boundary_f1]
+      alpha_when_applicable: [sad, mse, mae]
+      complementary_alpha: [gradient_error, connectivity_error]
+      boundary_f1:
+        tolerance: null # TODO: Fix the boundary tolerance.
+        tolerance_units: null # TODO: Choose pixels or a fraction of the image diagonal.
+        matching_rule: null # TODO: Fix the contour matching rule.
+      empty_masks_policy: null # TODO: Define metric values and coverage for empty masks.
+      alpha_conventions: null # TODO: Confirm SAD/MSE normalization and the valid pixel domain.
+      complementary_reference_implementation: null # TODO: Pin Gradient Error and Connectivity Error definitions and normalization.
+performance:
+  repetitions: 5
+  warmup_runs: null # TODO: Fix the number of untimed warm-up runs.
+  synchronize_gpu_before_and_after_timing: true
+  record_each_repetition: true
+  aggregate_time_by: [mean, median, dispersion]
+  timing_unit: ms
+  timing_stages: [model_load, preprocessing, auxiliary_steps, inference, postprocessing, total]
+  include_auxiliary_cost_in_total: true
+  memory_peaks: [ram_mb, vram_mb_if_applicable]
+  memory_measurement: null # TODO: Fix the profiling tools and measurement scope.
+  record_checkpoint_size_when_applicable: true
+logging:
+  directory: logs
+  record_status_and_error_reason_per_image: true
+  retain_failed_rows: true
+  report_failure_counts_and_denominators: true
+outputs:
+  run_directory_template: 'results/{experiment_id}/{run_id}'
+  require_unique_run_id: true
+  effective_config: config.json
+  metadata: metadata.json
+  record_config_hash: true
+  per_sample_format: csv
+  timing_repetitions: timing_repeats.csv
+  tables_directory: tables
+  figures_directory: figures

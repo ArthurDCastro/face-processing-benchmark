@@ -15,6 +15,9 @@ htmlcov/
 datasets/raw/
 datasets/annotations/
 datasets/processed/
+datasets/*/raw/
+datasets/*/processed/
+datasets/*/*.zip
 models/checkpoints/
 results/*/
 !results/README.md

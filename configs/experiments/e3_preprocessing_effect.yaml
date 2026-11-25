@@ -1,0 +1,87 @@
+schema_version: 2
+kind: experiment
+experiment_id: e3_preprocessing_effect
+config_files:
+  common: configs/common.yaml
+  datasets: configs/datasets.yaml
+  methods: configs/methods.yaml
+modes_from: e2_background_removal.modes
+method_ids_from: e2_background_removal.method_ids
+final_sample_ids_from: e2_background_removal.modes.final_evaluation
+preprocessing:
+  detector:
+    method_id: null # TODO: Select one detector using E1 only.
+    selection_experiment_id: e1_centering
+    fixed_across_images_and_methods: true
+    record_version_parameters_and_failures: true
+  target_center_fraction_xy: [0.5, 0.5]
+  same_transform_for_all_segmenters: true
+  # The protocol uses predicted boxes. The methods document also proposes a
+  # reference-box control, which requires independent annotations and a protocol.
+  reference_box_control: null # TODO: Decide whether to define a separate control with independent facial references.
+conditions:
+  C0:
+    geometry: original
+  C1:
+    geometry: translate_and_pad
+    deliberate_crop: false
+    record_source_pixel_loss: true
+    # The protocol allows border loss on a fixed canvas, while the methods
+    # document calls for full source retention. Resolve before freezing C1.
+    canvas_policy: null # TODO: Confirm C1 canvas and border loss policy.
+    padding_rule: null # TODO: Fix how exposed pixels are filled.
+  C2:
+    geometry: center_crop
+    padding: false
+    preserve_source_aspect_ratio: true
+    objective: largest_valid_region
+    crop_rule: null # TODO: Fix the exact crop and geometric feasibility rules.
+reference_geometry:
+  apply_corresponding_image_transform: true
+  track_source_and_artificial_pixels: true
+  binary_interpolation: nearest_neighbor
+  alpha_interpolation: null # TODO: Fix the alpha resampling method and coordinate conventions.
+  artificial_pixel_reference_policy: null # TODO: Define how secondary full-output metrics handle padding without reference.
+evaluation:
+  metrics_from: common.policies.segmentation.metrics
+  primary_region: intersection_of_original_valid_regions
+  common_region_space: source_image
+  common_region_mapping: null # TODO: Fix reprojection, valid pixel and boundary conventions.
+  secondary_region: full_condition_output
+  include_artificial_pixels_in_primary_metrics: false
+  pair_by: [image_id, method]
+  baseline_condition_id: C0
+  comparison_condition_ids: [C1, C2]
+  delta: condition_minus_baseline
+  summarize_deltas_by: [mean, median, dispersion]
+  confidence_level: 0.95
+  confidence_interval_method: null # TODO: Specify the paired interval method before final evaluation.
+  statistical_testing_plan: null # TODO: Decide on paired tests and multiple-comparison treatment.
+  practical_equivalence_tolerances: null # TODO: Fix metric-specific tolerances for negligible changes.
+  paired_failure_policy: null # TODO: Define eligibility when detection, geometry or inference fails.
+  report_paired_exclusions_and_coverage: true
+  performance_metrics: [segmentation_ms, preprocessing_ms, pipeline_ms, peak_ram_mb, peak_vram_mb, processed_pixels]
+final_quality_volume:
+  max_segmentations: 6000
+  max_reusable_baseline_segmentations: 2000
+  additional_segmentations_if_all_baselines_reused: 4000
+  timing_repetitions_included: false
+baseline_reuse:
+  source_experiment_id: e2_background_removal
+  condition_id: C0
+  require_identical: [inputs, versions, effective_inference_config, checkpoints]
+  recompute_metrics_for_common_region: true
+  # Reuse predictions for paired quality only if the original-resolution output is available.
+  require_prediction_for_common_region: true
+  timing_requires_matching_benchmark_environment: true
+outputs:
+  per_sample:
+    file: per_image_condition.csv
+    row_key: [image_id, method, condition]
+    columns: [image_id, method, condition, detector_used, transform_id, source_pixels_retained_ratio, artificial_pixels_ratio, output_width, output_height, internal_width, internal_height, processed_pixels, valid_region_pixels, iou_full, iou_common, dice_full, dice_common, boundary_f1_full, boundary_f1_common, sad_full, sad_common, mse_full, mse_common, mae_full, mae_common, segmentation_ms, preprocessing_ms, pipeline_ms, peak_ram_mb, peak_vram_mb, status, error_reason]
+  transformations:
+    file: transformations.csv
+    columns: [image_id, condition, transform_id, matrix, origin, source_width, source_height, output_width, output_height, source_pixels_retained_ratio, artificial_pixels_ratio, status, error_reason]
+  paired_differences: paired_differences.csv
+  tables: [T3.1, T3.2, T3.3, T3.4, T3.5]
+  figures: [G3.1, G3.2, G3.3, G3.4, G3.5, G3.6, G3.7]
