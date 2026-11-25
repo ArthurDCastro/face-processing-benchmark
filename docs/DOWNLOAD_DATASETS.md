@@ -65,7 +65,7 @@ O script utiliza [gdown](https://github.com/wkentaro/gdown) para baixar arquivos
 Instale a dependência no ambiente virtual:
 
 ```bash
-python -m pip install gdown
+python -m pip install -e '.[dataset-downloads]'
 ```
 
 ### PPM-100
@@ -123,10 +123,10 @@ Os índices são utilizados pelo validador descrito na próxima seção, que ver
 
 ## Validar a integridade dos datasets
 
-Depois do download e da indexação, execute `scripts/validate_datasets.py` para conferir os arquivos e os pares imagem–máscara. É necessário instalar `pillow` e `numpy`:
+Depois do download e da indexação, execute `scripts/validate_datasets.py` para conferir os arquivos e os pares imagem–máscara. Instale o extra `datasets`, que inclui Pillow e usa o NumPy declarado no projeto:
 
 ```bash
-python -m pip install pillow numpy
+python -m pip install -e '.[datasets]'
 python scripts/prepare_datasets.py --index
 ```
 

@@ -25,8 +25,9 @@ métricas. Os parâmetros serão congelados antes da avaliação final.
 Os oito métodos estão selecionados e os seis YAMLs já registram os datasets, os
 métodos e o protocolo de E1, E2 e E3. Os campos `null` acompanhados de `TODO`
 registram decisões em aberto. O carregador `fpb-check-config` ainda suporta apenas
-cadastros vazios da versão 1. A leitura dos YAMLs experimentais da versão 2,
-os adaptadores dos métodos, as métricas e os executores estão pendentes.
+cadastros vazios da versão 1. A leitura completa dos YAMLs experimentais da versão 2,
+os demais adaptadores, as métricas e os executores estão pendentes. Os quatro detectores faciais
+já podem ser executados isoladamente com a lista técnica da LFW.
 [Métodos selecionados](docs/METODOS_SELECIONADOS.md) ·
 [Especificação dos YAMLs](docs/CONFIGURACAO_EXPERIMENTOS.md)
 
@@ -42,8 +43,13 @@ Use Python 3.11 ou superior. Na raiz do repositório:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[dev]'
-python -m pip install pillow numpy
+python -m pip install -e '.[dev,datasets]'
+```
+
+Para instalar também os detectores e o suporte a downloads pelo Google Drive:
+
+```bash
+python -m pip install -e '.[all]'
 ```
 
 Com os dados originais já disponíveis em `datasets/<dataset>/raw/`:
@@ -80,3 +86,75 @@ comentários e mensagens dos scripts usam inglês.
 
 A licença do código ainda está pendente. Registre separadamente os termos de uso
 dos datasets e checkpoints antes de redistribuir imagens, anotações ou pesos.
+
+## Teste isolado do Viola–Jones
+
+Com a lista técnica da LFW preparada:
+
+```bash
+python -m pip install -e '.[viola-jones]'
+python scripts/test_viola_jones.py
+```
+
+Cada execução escreve `per_image.csv`, `summary.json` e os PNGs anotados em
+`results/viola_jones/<run_id>/`. A caixa verde indica a maior face e as caixas
+laranjas indicam as demais. A taxa reportada mede a presença de detecções nas
+20 imagens originais, sem anotação manual de caixas.
+
+## Teste isolado do HOG + SVM
+
+Instale o extra com dlib e OpenCV. Se o dlib precisar ser compilado, a
+instalação também exige CMake e um compilador C++.
+
+```bash
+python -m pip install -e '.[dev,hog-svm]'
+python -m pytest -q tests/test_hog_svm.py
+python scripts/test_hog_svm.py
+```
+
+O script lê as 20 imagens da lista técnica da LFW. Cada execução gera
+`per_image.csv`, `summary.json` e imagens anotadas em
+`results/hog_svm/<run_id>/`. Use `--no-visuals` para gerar apenas os relatórios.
+O resumo registra a versão do dlib e o número de ampliações configurado em
+`configs/methods.yaml`. O valor técnico inicial é uma ampliação, conforme
+o [exemplo oficial do dlib](https://dlib.net/face_detector.py.html).
+
+## Teste isolado do YuNet
+
+O YuNet usa o ONNX oficial `face_detection_yunet_2023mar.onnx` do OpenCV Zoo.
+Ele deve ficar em `models/checkpoints/`, diretório ignorado pelo Git. Em uma
+cópia nova do repositório, obtenha o arquivo com:
+
+```bash
+mkdir -p models/checkpoints
+curl -fL 'https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx' \
+  -o models/checkpoints/face_detection_yunet_2023mar.onnx
+```
+
+O adaptador verifica o SHA-256 declarado em `configs/methods.yaml` ao carregar
+o modelo. Com o ONNX e a lista técnica da LFW disponíveis:
+
+```bash
+python -m pip install -e '.[dev,yunet]'
+python -m pytest -q tests/test_yunet.py
+python scripts/test_yunet.py
+```
+
+As saídas ficam em `results/yunet/<run_id>/` com `per_image.csv`,
+`summary.json` e imagens anotadas. Use `--no-visuals` para gerar só os relatórios.
+
+## Teste isolado do SCRFD-500MF
+
+Com o [checkpoint oficial](models/README.md#scrfd-500mf) e a lista técnica da
+LFW disponíveis:
+
+```bash
+python -m pip install -e '.[dev,scrfd]'
+python -m pytest -q tests/test_scrfd.py
+python scripts/test_scrfd.py
+```
+
+O script roda com ONNX Runtime em CPU e grava `per_image.csv`, `summary.json`
+e imagens anotadas em `results/scrfd/<run_id>/`. Use `--no-visuals` para gerar
+apenas os relatórios. A configuração técnica inicial segue o exemplo oficial
+com entrada de 640 × 640, limiar de confiança 0,5 e NMS 0,4.

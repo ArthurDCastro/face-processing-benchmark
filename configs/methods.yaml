@@ -1,4 +1,4 @@
-# Implementation candidates identify upstream APIs or projects. Local adapters are pending.
+# Implementation candidates identify upstream APIs or projects. Status describes each local adapter.
 # Checkpoint paths, when applicable, are repository-relative.
 schema_version: 2
 kind: methods
@@ -7,57 +7,73 @@ methods:
     name: Viola-Jones
     task: face_detection
     type: classical
-    implementation: {candidate: cv2.CascadeClassifier, status: planned}
+    implementation:
+      candidate: cv2.CascadeClassifier
+      status: implemented
+      reference: https://github.com/Irismoraes/centralizadorFacial/blob/79e3ffdfe9d6b4cd45c2d565195a78f708f28a77/detectores.py
     checkpoint:
-      path: null # TODO: Select a local Haar cascade XML.
-      version: null # TODO: Pin the cascade release and library version.
-      sha256: null # TODO: Record the cascade file hash.
+      path: null # Use the OpenCV-bundled XML unless a repository-relative path is set.
+      bundled_file: haarcascade_frontalface_default.xml
+      version: opencv_distribution # Record the effective version and XML hash at run time.
     parameters:
-      scale_factor: null # TODO: Fix the scan scale factor.
-      min_neighbors: null # TODO: Fix the neighbor count.
-      min_size_px: null # TODO: Fix the minimum face size.
+      scale_factor: 1.1
+      min_neighbors: 5
+      min_size_px: [30, 30]
+      max_side_px: 1024
     output: face_boxes
   hog_svm:
     name: HOG + SVM
     task: face_detection
     type: classical
-    implementation: {candidate: dlib.get_frontal_face_detector, status: planned}
+    implementation:
+      candidate: dlib.get_frontal_face_detector
+      status: implemented
+      reference: https://dlib.net/face_detector.py.html
     checkpoint:
-      source: bundled_if_dlib_is_selected
-      version: null # TODO: Pin the trained detector and the library version.
-      sha256: null # TODO: Record the weights hash or the pinned distribution hash for bundled weights.
+      source: dlib_bundled_frontal_face_detector
+      version: dlib_distribution # Record the effective dlib version at run time.
+      sha256: null # TODO: Pin the distribution hash before final evaluation.
     parameters:
-      upsample_count: null # TODO: Fix the image pyramid upsampling count.
+      upsample_count: 1 # Initial technical setting from the dlib example.
     output: face_boxes
   yunet:
     name: YuNet
     task: face_detection
     type: deep_learning
-    implementation: {candidate: cv2.FaceDetectorYN, status: planned}
+    implementation:
+      candidate: cv2.FaceDetectorYN
+      status: implemented
+      reference: https://github.com/Irismoraes/centralizadorFacial/blob/79e3ffdfe9d6b4cd45c2d565195a78f708f28a77/detectores.py
     checkpoint:
-      path: null # TODO: Select a local YuNet ONNX file.
-      version: null # TODO: Pin the model revision.
-      sha256: null # TODO: Record the ONNX file hash.
+      path: models/checkpoints/face_detection_yunet_2023mar.onnx
+      version: 2023mar
+      sha256: 8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4
     parameters:
-      score_threshold: null # TODO: Set the confidence threshold in validation.
-      nms_threshold: null # TODO: Fix the NMS threshold.
-      internal_resolution_px: null # TODO: Fix the input sizing policy.
+      score_threshold: 0.7
+      nms_threshold: 0.3
+      top_k: 5000
+      initial_input_size_px: [320, 320]
+      max_side_px: 1024
     output: face_boxes
   scrfd:
     name: SCRFD
     task: face_detection
     type: deep_learning
-    implementation: {candidate: InsightFace SCRFD, status: planned}
+    implementation:
+      candidate: InsightFace SCRFD with ONNX Runtime
+      status: implemented
+      reference: https://github.com/deepinsight/insightface/blob/master/detection/scrfd/tools/scrfd.py
     checkpoint:
-      variant: null # TODO: Select the SCRFD variant.
-      path: null # TODO: Confirm the local checkpoint path.
-      version: null # TODO: Pin the checkpoint revision.
-      sha256: null # TODO: Record the checkpoint hash.
+      variant: SCRFD-500MF
+      path: models/checkpoints/det_500m.onnx
+      version: model-zoo/buffalo_sc
+      sha256: 5e4447f50245bbd7966bd6c0fa52938c61474a04ec7def48753668a9d8b4ea3a
+      source: https://github.com/deepinsight/insightface/releases/download/model-zoo/buffalo_sc.zip
+      license: non_commercial_research_only
     parameters:
-      score_threshold: null # TODO: Set the confidence threshold in validation.
-      nms_threshold: null # TODO: Fix the NMS threshold.
-      internal_resolution_px: null # TODO: Fix the input sizing policy.
-      batch_size: null # TODO: Fix the inference batch size.
+      score_threshold: 0.5
+      nms_threshold: 0.4
+      internal_resolution_px: [640, 640]
     output: face_boxes
   grabcut:
     name: GrabCut

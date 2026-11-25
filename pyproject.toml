@@ -8,10 +8,19 @@ version = "0.1.0"
 description = "Independent research scaffold for face processing benchmarks"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["PyYAML>=6.0,<7"]
+dependencies = ["PyYAML>=6.0,<7", "numpy>=1.24"]
 
 [project.optional-dependencies]
+datasets = ["Pillow>=9"]
+dataset-downloads = ["gdown>=5.2,<6"]
+hog-svm = ["dlib>=19.24,<21", "opencv-python-headless>=4.8,<5"]
+viola-jones = ["opencv-python-headless>=4.8,<5"]
+yunet = ["opencv-python-headless>=4.8,<5"]
+scrfd = ["onnxruntime>=1.20,<2", "opencv-python-headless>=4.8,<5"]
 dev = ["pytest>=8", "ruff>=0.9"]
+all = [
+    "face-processing-benchmark[dev,datasets,dataset-downloads,viola-jones,hog-svm,yunet,scrfd]",
+]
 
 [project.scripts]
 fpb-check-config = "face_processing_benchmark.core.config:main"

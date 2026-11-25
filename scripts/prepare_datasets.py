@@ -73,7 +73,9 @@ def download_drive_archive(url: str, destination: Path) -> Path:
     try:
         import gdown
     except ImportError as exc:
-        raise RuntimeError('Install Google Drive support: pip install gdown') from exc
+        raise RuntimeError(
+            "Install Google Drive support: python -m pip install -e '.[dataset-downloads]'"
+        ) from exc
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists() and destination.stat().st_size > 0:
         print(f'Using existing download: {destination}')
