@@ -39,7 +39,11 @@ scenarios:
 centering:
   strategy: crop
   same_geometry_for_all_methods: true
-  crop_parameters: null # TODO: Confirm crop size, aspect ratio and feasibility rules.
+  crop_parameters:
+    target_center_from: synthetic_canvas.target_center_fraction_xy
+    size_rule: largest_source_aspect_ratio_crop
+    origin_rounding: nearest_pixel
+    require_full_face_box: true
 evaluation:
   face_reference_rule: null # TODO: Freeze the approximate LFW face center procedure.
   transform_face_reference_with_image: true

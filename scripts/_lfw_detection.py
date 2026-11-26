@@ -8,6 +8,8 @@ from statistics import median
 from tempfile import mkdtemp
 
 import cv2
+import numpy as np
+from numpy.typing import NDArray
 
 from face_processing_benchmark.core.interfaces import FaceDetector
 from face_processing_benchmark.core.types import FaceDetectionResult
@@ -29,19 +31,24 @@ def read_manifest(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def read_lfw_image(root: Path, source: str) -> NDArray[np.uint8]:
+    relative = Path(source)
+    path = (root / relative).resolve()
+    if relative.is_absolute() or not path.is_relative_to(root / "lfw" / "raw"):
+        raise ValueError("Image path must be relative to the LFW raw directory")
+    if not path.is_file():
+        raise ValueError("Image file is missing")
+    image = cv2.imread(str(path), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+    if image is None:
+        raise ValueError("Image cannot be decoded")
+    return image
+
+
 def process_image(
     detector: FaceDetector, root: Path, source: str, visual: Path | None
 ) -> FaceDetectionResult:
     try:
-        relative = Path(source)
-        path = (root / relative).resolve()
-        if relative.is_absolute() or not path.is_relative_to(root / "lfw" / "raw"):
-            raise ValueError("Image path must be relative to the LFW raw directory")
-        if not path.is_file():
-            raise ValueError("Image file is missing")
-        image = cv2.imread(str(path), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
-        if image is None:
-            raise ValueError("Image cannot be decoded")
+        image = read_lfw_image(root, source)
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     except (OSError, ValueError, cv2.error) as exc:
         return FaceDetectionResult((), None, 0.0, 0.0, "error", str(exc))

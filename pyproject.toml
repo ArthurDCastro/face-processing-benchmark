@@ -16,10 +16,11 @@ dataset-downloads = ["gdown>=5.2,<6"]
 hog-svm = ["dlib>=19.24,<21", "opencv-python-headless>=4.8,<5"]
 viola-jones = ["opencv-python-headless>=4.8,<5"]
 yunet = ["opencv-python-headless>=4.8,<5"]
+padding = ["opencv-python-headless>=4.8,<5"]
 scrfd = ["onnxruntime>=1.20,<2", "opencv-python-headless>=4.8,<5"]
 dev = ["pytest>=8", "ruff>=0.9"]
 all = [
-    "face-processing-benchmark[dev,datasets,dataset-downloads,viola-jones,hog-svm,yunet,scrfd]",
+    "face-processing-benchmark[dev,datasets,dataset-downloads,padding,viola-jones,hog-svm,yunet,scrfd]",
 ]
 
 [project.scripts]
